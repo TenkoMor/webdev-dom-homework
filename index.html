@@ -8,7 +8,7 @@
 
   <body>
     <div class="container">
-      <ul class="comments">
+      <ul class="comments" id="list">
         <li class="comment">
           <div class="comment-header">
             <div>Глеб Фокин</div>
@@ -49,23 +49,72 @@
           type="text"
           class="add-form-name"
           placeholder="Введите ваше имя"
+          id="name-input"
         />
         <textarea
           type="textarea"
           class="add-form-text"
           placeholder="Введите ваш коментарий"
           rows="4"
+          id="comment-input"
         ></textarea>
         <div class="add-form-row">
-          <button class="add-form-button">Написать</button>
+          <button class="add-form-button" id="add-button">Написать</button>
         </div>
       </div>
+      <button class="add-form-button" id="delete-button">Удалить последний комментарий</button>
     </div>
   </body>
 
   <script>
     "use strict";
-    // Код писать здесь
+    const buttonElement = document.getElementById("add-button");
+    const listElement = document.getElementById("list");
+    const nameInputElement = document.getElementById("name-input");
+    const commentInputElement = document.getElementById("comment-input");
+    const delbuttonElement = document.getElementById("delete-button");
+
+    buttonElement.disabled = true;
+    addEventListener("input", (event) => {
+      if (nameInputElement.value == "" || commentInputElement.value == ""){
+        buttonElement.disabled = true;
+      };
+      if (nameInputElement.value != "" && commentInputElement.value != ""){
+        buttonElement.disabled = false;
+      };
+    });
+    buttonElement.addEventListener("click", () => {
+      const oldList = listElement.innerHTML;
+      const date = new Date();
+      listElement.innerHTML = oldList + `
+      <li class="comment">
+          <div class="comment-header">
+            <div>${nameInputElement.value}</div>
+            <div>${Intl.DateTimeFormat('ru-RU', {day: 'numeric', month: 'numeric', year: '2-digit'}).format(date)} ${Intl.DateTimeFormat('ru-RU', {timeStyle: 'short'}).format(date)}</div>
+          </div>
+          <div class="comment-body">
+            <div class="comment-text">${commentInputElement.value}</div>
+          </div>
+          <div class="comment-footer">
+            <div class="likes">
+              <span class="likes-counter">0</span>
+              <button class="like-button"></button>
+            </div>
+          </div>
+        </li>
+      `;
+      nameInputElement.value = "";
+      commentInputElement.value = "";
+      buttonElement.disabled = true;
+    });
+
+    delbuttonElement.addEventListener("click", () => {
+      let startIndex = listElement.innerHTML.lastIndexOf('<li class="comment">');
+      let endIndex = listElement.innerHTML.lastIndexOf('</li>');
+      const modifiedHtml = listElement.innerHTML.substring(0, startIndex) + listElement.innerHTML.substring(endIndex);
+      listElement.innerHTML = modifiedHtml;
+    });
+
     console.log("It works!");
   </script>
 </html>
