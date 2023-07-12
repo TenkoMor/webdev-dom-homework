@@ -52,7 +52,8 @@ body {
 
   .comment-footer {
     display: flex;
-    justify-content: flex-end;
+    align-items: baseline;
+    justify-content: space-between;
   }
 
   .comment-body {
@@ -122,7 +123,11 @@ body {
     justify-content: flex-end;
   }
 
-  .add-form-button {
+  .edit-form-text{
+    width: calc(500px - 44px);
+  }
+
+  .button {
     margin-top: 24px;
     font-size: 24px;
     padding: 10px 20px;
@@ -132,6 +137,6 @@ body {
     cursor: pointer;
   }
 
-  .add-form-button:hover {
+  .button:hover {
     opacity: 0.9;
   }
