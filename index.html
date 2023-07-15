@@ -42,16 +42,14 @@
       date: '12.02.22 12:18',
       comment: 'Это будет первый комментарий на этой странице',
       likes: 3,
-      like: false,
-      isEdit: false
+      like: false
     },
     {
       name: 'Варвара Н.',
       date: '13.02.22 19:22',
       comment: 'Мне нравится как оформлена эта страница! ❤',
       likes: 75,
-      like: false,
-      isEdit: false
+      like: false
     }
   ];
 
@@ -74,62 +72,40 @@
         };
 
         renderComments();
+        event.stopPropagation();
       });
     };
   };
 
-  const showTextArea = (index) => {
-    const commentsBodyElements = document.querySelectorAll(".comment-body");
+  const replyComment = () => {
+    const commentsElements = document.querySelectorAll(".comment");
 
-    for (const commentBodyElement of commentsBodyElements){
-      if (commentBodyElement.dataset.index === index){
-        commentBodyElement.innerHTML = `<textarea type="textarea" class="add-form-text edit-form-text" id="edit-comment" placeholder="Введите ваш коментарий" rows='4'>${comments[index].comment}</textarea>`;
-      };
-    };
-  };
-  const hideTextArea = (index) => {
-    const commentsBodyElements = document.querySelectorAll(".comment-body");
-
-    for (const commentBodyElement of commentsBodyElements){
-      if (commentBodyElement.dataset.index === index){
-        commentBodyElement.innerHTML = `<div class="comment-text">${user.comment}</div>`;
-      };
-    };
-  };
-  const editComment = () => {
-    const editButtonsElements = document.querySelectorAll(".edit-button");
-
-    for (const editButtonElement of editButtonsElements){
-      editButtonElement.addEventListener("click", () => {
-        const index = editButtonElement.dataset.index;
-        const comm = comments[index];
-
-        if (comm.isEdit === false){
-          comm.isEdit = true;
-          showTextArea(index);
-          editButtonElement.innerHTML = 'Сохранить';
-          return
-        } else if (comm.isEdit === true){
-          comm.isEdit = false;
-          comm.comment = document.getElementById("edit-comment").value;
-        }
-        renderComments();
+    for (const comment of commentsElements){
+      const index = comment.dataset.index;
+      comment.addEventListener("click", () => {
+        const elsesComment = comments[index].comment;
+        commentInputElement.value =`> ${comments[index].name}
+"${elsesComment}" <
+`;
       });
     };
+  };
+
+  const safeHtmlString = (str) => {
+    return str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
   };
 
   const renderComments = () => {
     const commentsHtml = comments.map((user, index) => {
-      return `<li class="comment">
+      return `<li class="comment" data-index="${index}">
           <div class="comment-header">
             <div>${user.name}</div>
             <div>${user.date}</div>
           </div>
-          <div class="comment-body" data-index="${index}">
+          <div class="comment-body">
             <div class="comment-text">${user.comment}</div>
           </div>
           <div class="comment-footer">
-            <button class="button edit-button" data-index="${index}">Редактировать</button>
             <div class="likes">
               <span class="likes-counter">${user.likes}</span>
               <button class="like-button ${user.isActive}" data-index="${index}"></button>
@@ -141,7 +117,7 @@
     listElement.innerHTML = commentsHtml;
 
     likeButtonWork();
-    editComment();
+    replyComment();
   };
 
   renderComments();
@@ -159,12 +135,11 @@
 
   buttonElement.addEventListener("click", () => {
     comments.push({
-      name: nameInputElement.value,
+      name: safeHtmlString(nameInputElement.value),
       date: postingDate(),
-      comment: commentInputElement.value,
+      comment: safeHtmlString(commentInputElement.value),
       likes: 0,
-      like: false,
-      isEdit: false
+      like: false
     })
 
     renderComments();

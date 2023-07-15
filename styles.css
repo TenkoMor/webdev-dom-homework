@@ -32,6 +32,8 @@ body {
     );
     filter: drop-shadow(0px 20px 67px rgba(0, 0, 0, 0.08));
     border-radius: 20px;
+    white-space: pre-line;
+    cursor: pointer;
   }
 
   .comments {
@@ -53,7 +55,7 @@ body {
   .comment-footer {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
+    justify-content: flex-end;
   }
 
   .comment-body {
@@ -121,10 +123,6 @@ body {
   .add-form-row {
     display: flex;
     justify-content: flex-end;
-  }
-
-  .edit-form-text{
-    width: calc(500px - 44px);
   }
 
   .button {
