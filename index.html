@@ -146,10 +146,6 @@
         text: safeHtmlString(commentInputElement.value),
         name: safeHtmlString(nameInputElement.value)
       })
-    }).then((response) => {
-      response.json().then((responseData) => {
-        comments = responseData.comments;
-      });
     });
 
     clFunction(fetch("https://wedev-api.sky.pro/api/v1/liza-kortik/comments", {
