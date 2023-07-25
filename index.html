@@ -146,11 +146,11 @@
         text: safeHtmlString(commentInputElement.value),
         name: safeHtmlString(nameInputElement.value)
       })
+    }).then(() => {
+      clFunction(fetch("https://wedev-api.sky.pro/api/v1/liza-kortik/comments", {
+        method: "GET"
+      }));
     });
-
-    clFunction(fetch("https://wedev-api.sky.pro/api/v1/liza-kortik/comments", {
-      method: "GET"
-    }));
 
     nameInputElement.value = "";
     commentInputElement.value = "";
