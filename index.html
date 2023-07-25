@@ -19,7 +19,7 @@
         <button class="button" id="add-button">Написать</button>
       </div>
     </div>
-    <button class="button" id="delete-button">Удалить последний комментарий</button>
+    <!-- <button class="button" id="delete-button">Удалить последний комментарий</button> -->
   </div>
 </body>
 
@@ -30,49 +30,62 @@
   const nameInputElement = document.getElementById("name-input");
   const commentInputElement = document.getElementById("comment-input");
   const delButtonElement = document.getElementById("delete-button");
+  
+  const fetchPromise = fetch("https://wedev-api.sky.pro/api/v1/liza-kortik/comments", {
+    method: "GET"
+  });
 
-  const postingDate = () => {
-    const date = new Date();
+  let comments = [];
+
+  const clFunction = (fetch) => {
+    return fetch.then((response) => {
+      response.json().then((responseData) => {
+        const comms = responseData.comments.map((comment) => {
+          return {
+            name: comment.author.name,
+            date: postingDate(new Date(comment.date)),
+            text: comment.text,
+            likes: 0,
+            isLiked: false
+          };
+        });
+        comments = comms;
+        console.log(comments);
+        renderComments();
+      });
+    });
+  };
+
+  clFunction(fetchPromise);
+
+  const postingDate = (date) => {
     return `${Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'numeric', year: '2-digit' }).format(date)} ${Intl.DateTimeFormat('ru-RU', { timeStyle: 'short' }).format(date)}`;
   };
 
-  const comments = [
-    {
-      name: 'Глеб Фокин',
-      date: '12.02.22 12:18',
-      comment: 'Это будет первый комментарий на этой странице',
-      likes: 3,
-      like: false
-    },
-    {
-      name: 'Варвара Н.',
-      date: '13.02.22 19:22',
-      comment: 'Мне нравится как оформлена эта страница! ❤',
-      likes: 75,
-      like: false
-    }
-  ];
+  const safeHtmlString = (str) => {
+    return str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+  };
 
   const likeButtonWork = () => {
     const likeButtonsElements = document.querySelectorAll(".like-button");
 
     for (const likeButtonElement of likeButtonsElements) {
       likeButtonElement.addEventListener("click", () => {
+        event.stopPropagation();
         const index = likeButtonElement.dataset.index;
         const comm = comments[index];
         
-        if (comm.like === false) {
-          comm.like = true;
+        if (comm.isLiked === false) {
+          comm.isLiked = true;
           comm.likes += 1;
           comm.isActive = '-active-like';
-        } else if (comm.like === true) {
-          comm.like = false;
+        } else if (comm.isLiked === true) {
+          comm.isLiked = false;
           comm.likes -= 1;
           delete comm.isActive;
         };
 
         renderComments();
-        event.stopPropagation();
       });
     };
   };
@@ -82,17 +95,13 @@
 
     for (const comment of commentsElements){
       const index = comment.dataset.index;
+
       comment.addEventListener("click", () => {
-        const elsesComment = comments[index].comment;
         commentInputElement.value =`> ${comments[index].name}
-"${elsesComment}" <
+"${comments[index].text}" <
 `;
       });
     };
-  };
-
-  const safeHtmlString = (str) => {
-    return str.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
   };
 
   const renderComments = () => {
@@ -103,7 +112,7 @@
             <div>${user.date}</div>
           </div>
           <div class="comment-body">
-            <div class="comment-text">${user.comment}</div>
+            <div class="comment-text">${user.text}</div>
           </div>
           <div class="comment-footer">
             <div class="likes">
@@ -120,10 +129,7 @@
     replyComment();
   };
 
-  renderComments();
-
   buttonElement.disabled = true;
-
   addEventListener("input", (event) => {
     if (nameInputElement.value == "" || commentInputElement.value == "") {
       buttonElement.disabled = true;
@@ -134,24 +140,21 @@
   });
 
   buttonElement.addEventListener("click", () => {
-    comments.push({
-      name: safeHtmlString(nameInputElement.value),
-      date: postingDate(),
-      comment: safeHtmlString(commentInputElement.value),
-      likes: 0,
-      like: false
-    })
-
-    renderComments();
+    fetch("https://wedev-api.sky.pro/api/v1/liza-kortik/comments", {
+      method: "POST",
+      body: JSON.stringify({
+        text: safeHtmlString(commentInputElement.value),
+        name: safeHtmlString(nameInputElement.value)
+      })
+    }).then(() => {
+      clFunction(fetch("https://wedev-api.sky.pro/api/v1/liza-kortik/comments", {
+        method: "GET"
+      }));
+    });
 
     nameInputElement.value = "";
     commentInputElement.value = "";
     buttonElement.disabled = true;
-  });
-
-  delButtonElement.addEventListener("click", () => {
-    comments.pop();
-    renderComments();
   });
 
   console.log("It works!");
