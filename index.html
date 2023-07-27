@@ -11,7 +11,8 @@
   <div class="container">
     <ul class="comments" id="list">
     </ul>
-    <div class="add-form">
+    <div class="load" id="loader"></div>
+    <div class="add-form" id="add-from-load">
       <input type="text" class="add-form-name" placeholder="Введите ваше имя" id="name-input" />
       <textarea type="textarea" class="add-form-text" placeholder="Введите ваш коментарий" rows="4"
         id="comment-input"></textarea>
@@ -19,7 +20,6 @@
         <button class="button" id="add-button">Написать</button>
       </div>
     </div>
-    <!-- <button class="button" id="delete-button">Удалить последний комментарий</button> -->
   </div>
 </body>
 
@@ -29,17 +29,15 @@
   const listElement = document.getElementById("list");
   const nameInputElement = document.getElementById("name-input");
   const commentInputElement = document.getElementById("comment-input");
-  const delButtonElement = document.getElementById("delete-button");
-  
-  const fetchPromise = fetch("https://wedev-api.sky.pro/api/v1/liza-kortik/comments", {
-    method: "GET"
-  });
 
   let comments = [];
 
-  const clFunction = (fetch) => {
-    return fetch.then((response) => {
-      response.json().then((responseData) => {
+  const clFunction = () => {
+    return fetch("https://wedev-api.sky.pro/api/v1/liza-kortikova/comments", {
+    method: "GET"
+    }).then((response) => {
+      return response.json()})
+      .then((responseData) => {
         const comms = responseData.comments.map((comment) => {
           return {
             name: comment.author.name,
@@ -53,10 +51,17 @@
         console.log(comments);
         renderComments();
       });
-    });
   };
 
-  clFunction(fetchPromise);
+  document.getElementById("loader").textContent = "Пожалуйста подождите, загружаю комментарии..."
+
+  fetch("https://wedev-api.sky.pro/api/v1/liza-kortikova/comments")
+  .then(() => {
+    return clFunction();
+  })
+  .then(() => {
+    document.getElementById("loader").textContent = "";
+  })
 
   const postingDate = (date) => {
     return `${Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'numeric', year: '2-digit' }).format(date)} ${Intl.DateTimeFormat('ru-RU', { timeStyle: 'short' }).format(date)}`;
@@ -138,19 +143,25 @@
       buttonElement.disabled = false;
     };
   });
+  
+  buttonElement.addEventListener("click", () => { 
+    document.getElementById("loader").textContent = "Комментарий загружается..."
+    document.getElementById("add-from-load").classList.add("hide")
 
-  buttonElement.addEventListener("click", () => {
-    fetch("https://wedev-api.sky.pro/api/v1/liza-kortik/comments", {
+    fetch("https://wedev-api.sky.pro/api/v1/liza-kortikova/comments", {
       method: "POST",
       body: JSON.stringify({
         text: safeHtmlString(commentInputElement.value),
         name: safeHtmlString(nameInputElement.value)
       })
-    }).then(() => {
-      clFunction(fetch("https://wedev-api.sky.pro/api/v1/liza-kortik/comments", {
-        method: "GET"
-      }));
-    });
+    })
+    .then(() => {
+      return clFunction();
+    })
+    .then(() => {
+      document.getElementById("add-from-load").classList.remove("hide");
+      document.getElementById("loader").textContent = "";
+    })
 
     nameInputElement.value = "";
     commentInputElement.value = "";

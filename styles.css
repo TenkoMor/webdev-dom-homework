@@ -138,3 +138,11 @@ body {
   .button:hover {
     opacity: 0.9;
   }
+
+  .hide{
+    display: none;
+  }
+
+  .load{
+    padding-top: 12px;
+  }
